@@ -24,7 +24,7 @@ export class BenchmarkService implements OnModuleInit {
     // --- TESTE REST ---
     const startRest = performance.now();
     // o endpoint REST de heroes está em '/' no HeroController
-    const res = await axios.get('http://localhost:3000/');
+    const res = await axios.get('http://localhost:3000/hero');
     const endRest = performance.now();
     const timeRest = (endRest - startRest).toFixed(2);
     console.log(`📡 REST (JSON): ${timeRest} ms (bytes: ${res.headers['content-length'] || 'unknown'})`);

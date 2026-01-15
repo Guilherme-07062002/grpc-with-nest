@@ -9,19 +9,21 @@ const HEROES = Array.from({ length: 5000 }, (_, i) => ({
   description: 'Uma descrição bem longa para ocupar espaço em bytes na transferência e ver quem comprime melhor os dados durante o envio.',
 }));
 
-@Controller()
+@Controller("hero")
 export class HeroController {
   constructor() {}
 
  // --- ENDPOINT REST (HTTP) ---
   @Get()
   getHeroesRest() {
+    console.log('GET /hero chamado');
     return HEROES; // Nest faz JSON.stringify() automático
   }
 
   // --- ENDPOINT gRPC ---
   @GrpcMethod('HeroService', 'GetHeroes')
   getHeroesGrpc() {
+    console.log('gRPC GetHeroes chamado');
     return { heroes: HEROES }; // Nest serializa para Protobuf
   }
 }
