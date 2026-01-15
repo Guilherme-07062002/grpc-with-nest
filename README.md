@@ -1,73 +1,39 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
+ # gRPC
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+ Exemplo de aplicação híbrida (HTTP + gRPC) usando NestJS para comparar performance e demonstrar integração via Protobuf.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+ - **Visão geral**: a aplicação expõe um endpoint REST e um serviço gRPC que retornam a mesma massa de dados (5.000 objetos). Existe também um `BenchmarkService` que compara o tempo de transferência REST vs gRPC.
 
-## Description
+ - **Arquivos importantes**:
+	 - `src/main.ts` — conecta o microservice gRPC (porta `50051`) e inicia a aplicação HTTP na porta `3000`.
+	 - `src/hero/hero.proto` — definição Protobuf do pacote `hero` com o serviço `HeroService` e mensagens `HeroList`/`Hero`.
+	 - `src/hero/hero.controller.ts` — implementa `GET /hero` (REST) e `@GrpcMethod('HeroService','GetHeroes')` (gRPC). Gera uma massa de 5.000 heróis para comparação de payload.
+	 - `src/app.module.ts` — registra o `ClientsModule` com um cliente gRPC (`HERO_PACKAGE`) para consumo do serviço via `ClientGrpc`.
+	 - `src/benchmark.service.ts` — exemplo de benchmark que realiza uma chamada HTTP para `GET /hero` e uma chamada gRPC (`getHeroes`) medindo latências e exibindo um comparativo.
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+ - **Comportamento**:
+	 - O endpoint REST (`GET /hero`) retorna um array JSON com 5.000 objetos.
+	 - O método gRPC (`GetHeroes`) retorna a mesma massa serializada via Protobuf, possibilitando comparação de payload, latência e tamanho.
+	 - O `BenchmarkService` realiza ambas chamadas e imprime tempos no console; ele usa `axios` para o teste HTTP e `ClientGrpc` + `firstValueFrom` para a chamada gRPC.
 
-## Installation
+ - **Como rodar**:
 
-```bash
-$ pnpm install
-```
+ ```bash
+ npm install
+ npm run start:dev
+ ```
 
-## Running the app
+ - A aplicação HTTP ficará em `http://localhost:3000` e o servidor gRPC em `0.0.0.0:50051`.
 
-```bash
-# development
-$ pnpm run start
+ - **Exemplos de chamadas**:
 
-# watch mode
-$ pnpm run start:dev
+ ```bash
+ # REST
+ curl http://localhost:3000/hero
 
-# production mode
-$ pnpm run start:prod
-```
-
-## Test
-
-```bash
-# unit tests
-$ pnpm run test
-
-# e2e tests
-$ pnpm run test:e2e
-
-# test coverage
-$ pnpm run test:cov
-```
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](LICENSE).
+ # gRPC (ex.: usando grpcurl)
+ grpcurl -plaintext 0.0.0.0:50051 hero.HeroService/GetHeroes
+ ```
+  - **Observações**:
+    - Este exemplo é útil para entender as diferenças de performance entre REST e gRPC, especialmente em payloads maiores.
+    - Pode ser estendido para incluir mais métodos, autenticação ou outras funcionalidades gRPC.
