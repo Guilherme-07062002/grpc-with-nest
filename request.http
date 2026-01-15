@@ -1,0 +1,3 @@
+###
+# execute benchmark
+GET http://localhost:3000/benchmark HTTP/1.1

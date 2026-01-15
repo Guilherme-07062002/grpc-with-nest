@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package hero;
+
+service HeroService {
+  // Retorna uma lista vazia ou cheia
+  rpc GetHeroes (Empty) returns (HeroList);
+}
+
+message Empty {}
+
+message HeroList {
+  repeated Hero heroes = 1;
+}
+
+message Hero {
+  int32 id = 1;
+  string name = 2;
+  string power = 3;
+  string description = 4; // Texto longo para pesar o JSON
+}
